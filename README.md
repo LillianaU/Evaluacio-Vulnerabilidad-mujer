@@ -7,7 +7,11 @@
 [![Privacidad](https://img.shields.io/badge/Privacidad-Zero--Identity%20%2F%20Memoria%20Vol%C3%A1til-f43f5e?style=for-the-badge&logo=ghost)](https://github.com)
 [![Normativa](https://img.shields.io/badge/Marco%20Legal-Ley%201010%20de%202006%20%28Colombia%29-0284c7?style=for-the-badge&logo=scales)](https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=18843)
 [![PDF Cero Huella](https://img.shields.io/badge/Reportes-PDF%20jsPDF%20Sin%20Cach%C3%A9-ea580c?style=for-the-badge&logo=adobeacrobatreader)](https://github.com)
+[![Vercel Live](https://img.shields.io/badge/Vercel%20Deploy-evaluacio--vulnerabilidad--mujer.vercel.app-000000?style=for-the-badge&logo=vercel)](https://evaluacio-vulnerabilidad-mujer.vercel.app)
 [![Licencia](https://img.shields.io/badge/Licencia-MIT-f59e0b?style=for-the-badge)](LICENSE)
+
+> 🌐 **Aplicación en Vivo (Despliegue Oficial en Vercel):**  
+> 👉 **[https://evaluacio-vulnerabilidad-mujer.vercel.app](https://evaluacio-vulnerabilidad-mujer.vercel.app)**
 
 ---
 
@@ -19,7 +23,7 @@ Diseñada bajo los principios de **Inmunidad Visual**, **Privacidad Absoluta (*Z
 
 1. **Diagnóstico Cuantitativo Ley 1010:** Algoritmo ponderado (0 - 100 PTS) que analiza las 6 modalidades de acoso tipificadas por el marco legal colombiano: *Maltrato laboral, Persecución laboral, Discriminación laboral, Entorpecimiento laboral, Inequidad laboral y Desprotección laboral*.
 2. **Generador de Reportes PDF de Cero Rastro (Zero-Trace in Memory):** Motor de compilación vectorial en tiempo real (`jsPDF`) que construye informes periciales oficiales en memoria volátil sin tocar disco ni registrar URLs persistentes en el historial de navegación.
-3. **Persistencia Híbrida Cifrada con Supabase & Cloud SQL:** Almacenamiento local mediante llaves criptográficas (AES-GCM-256) sincronizado con una base de datos relacional PostgreSQL en **Supabase** (`qfaofflaxxzfhovmwwtd`), aplicando *Row Level Security* (RLS) y disociación estricta de identidad (solo UUID v4 efímero).
+3. **Persistencia Híbrida Cifrada con Supabase & Cloud SQL:** Almacenamiento local mediante llaves criptográficas (AES-GCM-256) sincronizado con una base de datos relacional PostgreSQL en **Supabase**, aplicando *Row Level Security* (RLS) y disociación estricta de identidad (solo UUID v4 efímero).
 4. **Protocolo de Pánico y Purga Remota (*Panic Purge* < 150 ms):** Disparador de emergencia instantáneo (tecla doble Escape o botón flotante ⚡) que borra de manera atómica memorias de sesión, IndexedDB, cookies y ejecuta purga de la base de datos remota antes de sobreescribir el historial con una redirección neutra.
 5. **Hoja de Ruta Probatoria y Enrutamiento Institucional:** Guía de preservación de evidencia para Comités de Convivencia Laboral, Ministerio del Trabajo e integración directa con las líneas de auxilio nacional (**Línea 155**, **Línea 122** y **Línea 106**).
 
@@ -50,7 +54,7 @@ graph TB
     end
 
     subgraph Database_Layer ["🗄️ Capa de Persistencia Relacional"]
-        subgraph Supabase_Cloud ["🟢 Supabase Cloud (qfaofflaxxzfhovmwwtd)"]
+        subgraph Supabase_Cloud ["🟢 Supabase Cloud (PostgreSQL Seguro)"]
             Table_Eval_Supa[("Tabla: public.evaluaciones<br/>• anonymous_id (UUID v4)<br/>• score (0-100)<br/>• factors (JSONB)<br/>• answers (JSONB)")]
             Table_Users_Supa[("Tabla: public.users<br/>• uid (Hash)<br/>• email (Opcional)")]
             RLS_Policies["Row Level Security (RLS)<br/>• INSERT sin credenciales<br/>• PURGE por anonymous_id"]
@@ -120,7 +124,7 @@ El siguiente diagrama formal modela las interacciones entre los actores principa
 flowchart LR
     %% Actores
     Usuaria(["👩‍💼 Usuaria / Trabajadora<br/>(Víctima Potencial)"])
-    SupabaseDB[("☁️ Supabase PostgreSQL<br/>(qfaofflaxxzfhovmwwtd)")]
+    SupabaseDB[("☁️ Supabase PostgreSQL<br/>(Base de Datos Segura)")]
     RedEmergencia["🚨 Central de Emergencias 123<br/>& Líneas de Asistencia (155, 122)"]
 
     subgraph Sistema_VitalityShield ["🛡️ Sistema Vitality Shield (Límite del Sistema)"]
@@ -373,32 +377,83 @@ CREATE POLICY "Permitir purga de emergencia"
 
 ---
 
-## 🚀 7. Guía de Ejecución Local
+## 🚀 7. Guía Rápida: Uso Seguro de Archivos `.env` y Ejecución Local
 
-### Variables de Entorno Locales (`.env`)
-Crea un archivo llamado `.env` en la raíz de tu proyecto tomando como base `.env.example`:
+### 7.1 ¿Cómo crear tu archivo `.env` localmente?
+El proyecto incluye un archivo plantilla llamado **`.env.example`** que contiene la estructura requerida sin revelar credenciales.
 
-```env
-# Claves de Conexión a Supabase (obtenidas de Project Settings > Data API)
-VITE_SUPABASE_URL="https://<TU-PROJECT-ID>.supabase.co"
-VITE_SUPABASE_ANON_KEY="<TU-CLAVE-PUBLICA-ANON>"
+Para configurarlo en tu máquina local:
+1. Haz una copia del archivo de ejemplo y nómbralo exactamente **`.env`**:
+   ```bash
+   cp .env.example .env
+   ```
+2. Abre el nuevo archivo `.env` y coloca los valores reales de tu base de datos:
+   ```env
+   # Variables obligatorias para el cliente Vite (React)
+   VITE_SUPABASE_URL="https://<TU-PROJECT-ID>.supabase.co"
+   VITE_SUPABASE_ANON_KEY="<TU-CLAVE-PUBLICA-ANON>"
+
+   # Variables opcionales para backend / Drizzle ORM
+   SQL_HOST="db.<TU-PROJECT-ID>.supabase.co"
+   SQL_USER="postgres"
+   SQL_PASSWORD="<TU-PASSWORD-DE-BASE-DE-DATOS>"
+   SQL_DB_NAME="postgres"
+   ```
+
+### 7.2 ¿Por qué NUNCA debe subirse el archivo `.env` a GitHub?
+El archivo `.env` almacena llaves de acceso a tus servidores. Si se sube a un repositorio público o privado, cualquier persona podría inspeccionarlo o comprometer tu base de datos.
+
+Por esta razón, el archivo **`.gitignore`** incluye de forma obligatoria las siguientes directivas:
+```gitignore
+# Ignorar todos los archivos de entorno con claves reales
+.env*
+
+# Permitir únicamente la plantilla sin secretos
+!.env.example
 ```
+Con esta configuración, Git ignora tu archivo `.env` personal y te garantiza que nunca se incluirá en un `git commit` ni en un `git push`.
 
-### Instalación y Ejecución
+### 7.3 ¿Cómo configurar las variables en Vercel para mantener la seguridad?
+Al desplegar en la nube (Vercel), tu código fuente no lleva el archivo `.env`. En su lugar, Vercel proporciona una bóveda cifrada en la nube:
+1. En el panel de tu proyecto en Vercel, dirígete a **Project Settings ➔ Environment Variables**.
+2. Añade `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` con sus valores reales.
+3. Vercel las inyecta de forma segura durante la compilación (`npm run build`). Tus claves quedan protegidas, tu repositorio permanece limpio y tu aplicación funciona sin exponer secretos.
+
+### 7.4 Tabla de Referencia de Variables
+
+| Variable | Propósito | ¿De dónde se obtiene en Supabase? |
+| :--- | :--- | :--- |
+| **`VITE_SUPABASE_URL`** | Dirección URL del servidor API de Supabase para enviar evaluaciones de forma segura. | Panel de Supabase ➔ **Project Settings (⚙️)** ➔ **Data API** ➔ campo **Project URL**. |
+| **`VITE_SUPABASE_ANON_KEY`** | Clave pública para autorizar peticiones desde el navegador bajo políticas RLS. | Panel de Supabase ➔ **Project Settings (⚙️)** ➔ **Data API** ➔ **Project API keys** ➔ fila **`anon` `public`**. |
+| **`SQL_HOST`** | Dirección de red del servidor PostgreSQL (conexión directa o pooled). | Panel de Supabase ➔ **Project Settings (⚙️)** ➔ **Database** ➔ sección **Connection parameters** ➔ campo **Host**. |
+| **`SQL_USER`** | Usuario de conexión al motor PostgreSQL. | Valor predeterminado de Supabase: `postgres`. |
+| **`SQL_PASSWORD`** | Contraseña maestra de la base de datos PostgreSQL. | La contraseña que definiste al crear el proyecto en Supabase (se puede restablecer en **Database > Database password**). |
+| **`SQL_DB_NAME`** | Nombre de la base de datos relacional. | Valor predeterminado de Supabase: `postgres`. |
+
+---
+
+### 7.5 Comandos de Instalación y Ejecución Local
+
 ```bash
 # 1. Instalar dependencias
 npm install
 
-# 2. Iniciar servidor local de desarrollo
+# 2. Iniciar servidor local de desarrollo (Express + Vite)
 npm run dev
 
-# 3. Compilación para producción
+# 3. Comprobación de tipos TypeScript
+npm run lint
+
+# 4. Compilación estricta para producción
 npm run build
 ```
 
 ---
 
-## ☁️ 8. Tutorial Paso a Paso: Despliegue en Vercel
+## ☁️ 8. Tutorial de Despliegue en Vercel
+
+> 🌐 **URL de Producción Activa:**  
+> 👉 **[https://evaluacio-vulnerabilidad-mujer.vercel.app](https://evaluacio-vulnerabilidad-mujer.vercel.app)**
 
 Este proyecto incluye el archivo `vercel.json` preconfigurado en la raíz, permitiendo que Vercel reconozca automáticamente la arquitectura de Vite y configure el enrutamiento para Single Page Applications (SPA).
 
@@ -406,8 +461,8 @@ Este proyecto incluye el archivo `vercel.json` preconfigurado en la raíz, permi
 flowchart LR
     A["Repositorio GitHub<br/>(Rama main)"] -->|Importar Proyecto| B["Vercel Cloud"]
     B -->|Detecta vercel.json| C["Vite Builder<br/>npm run build"]
-    D["Supabase Dashboard<br/>Project Settings > API"] -.->|Inyectar Variables| B
-    C -->|Publicación Inmediata| E["Sitio en Producción<br/>https://tu-app.vercel.app"]
+    D["Supabase Dashboard<br/>Project Settings > API"] -.->|Inyectar Variables en Vercel| B
+    C -->|Publicación Inmediata| E["Sitio en Producción<br/>https://evaluacio-vulnerabilidad-mujer.vercel.app"]
 
     style A fill:#1e293b,stroke:#475569,color:#fff
     style B fill:#000,stroke:#fff,color:#fff
@@ -453,7 +508,9 @@ En la sección desplegable **Environment Variables**:
 ### Paso 5: Despliegue y Validación
 1. Haz clic en el botón **"Deploy"**.
 2. Vercel compilará la aplicación en aproximadamente 30 a 50 segundos.
-3. Al finalizar, recibirás una URL de producción (ej. `https://tu-proyecto.vercel.app`) con certificado SSL activo y protección contra caídas.
+3. Al finalizar, tu aplicación estará disponible globalmente en:  
+   👉 **[https://evaluacio-vulnerabilidad-mujer.vercel.app](https://evaluacio-vulnerabilidad-mujer.vercel.app)**  
+   con certificado SSL automático y protección contra caídas.
 4. **Despliegues continuos automáticos:** A partir de este momento, cada vez que hagas `git push` a tu rama principal en GitHub, Vercel compilará y actualizará tu aplicación automáticamente en tiempo real.
 
 ---
