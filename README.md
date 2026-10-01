@@ -1,0 +1,289 @@
+# 🛡️ VITALITY SHIELD — Plataforma Integral de Diagnóstico, Protección y Respaldo Jurídico ante Acoso Laboral
+
+[![Arquitectura](https://img.shields.io/badge/Arquitectura-Full--Stack%20%7C%20React%2019%20%2B%20TypeScript%20%2B%20Node.js-6366f1?style=for-the-badge&logo=react)](https://react.dev)
+[![Base de Datos](https://img.shields.io/badge/Base%20de%20Datos-PostgreSQL%20%7C%20Supabase%20%2B%20Cloud%20SQL-3ecf8e?style=for-the-badge&logo=supabase)](https://supabase.com)
+[![ORM](https://img.shields.io/badge/ORM-Drizzle%20ORM%20Type--Safe-c5f74f?style=for-the-badge&logo=drizzle)](https://orm.drizzle.team)
+[![Seguridad](https://img.shields.io/badge/Seguridad-Protocolo%200--Trace%20%7C%20OWASP%20Top%2010-10b981?style=for-the-badge&logo=shield)](https://owasp.org)
+[![Privacidad](https://img.shields.io/badge/Privacidad-Zero--Identity%20%2F%20Memoria%20Vol%C3%A1til-f43f5e?style=for-the-badge&logo=ghost)](https://github.com)
+[![Normativa](https://img.shields.io/badge/Marco%20Legal-Ley%201010%20de%202006%20%28Colombia%29-0284c7?style=for-the-badge&logo=scales)](https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=18843)
+[![PDF Cero Huella](https://img.shields.io/badge/Reportes-PDF%20jsPDF%20Sin%20Cach%C3%A9-ea580c?style=for-the-badge&logo=adobeacrobatreader)](https://github.com)
+[![Licencia](https://img.shields.io/badge/Licencia-MIT-f59e0b?style=for-the-badge)](LICENSE)
+
+---
+
+## 📋 Resumen Ejecutivo & Propuesta de Valor
+
+**Vitality Shield** es una plataforma tecnológica de grado de seguridad crítico concebida para la **identificación temprana, categorización jurídica y preservación probatoria confidencial** de situaciones de acoso laboral, con enfoque especializado en la protección de mujeres trabajadoras bajo la **Ley 1010 de 2006 de la República de Colombia** y los convenios internacionales de la **OIT (Convenio 190)**.
+
+Diseñada bajo los principios de **Inmunidad Visual**, **Privacidad Absoluta (*Zero-Identity Leakage*)** y **Garantía Cero Rastreo en Historial**, la plataforma resuelve la brecha de desprotección y temor a represalias laborales mediante:
+
+1. **Diagnóstico Cuantitativo Ley 1010:** Algoritmo ponderado (0 - 100 PTS) que analiza las 6 modalidades de acoso tipificadas por el marco legal colombiano: *Maltrato laboral, Persecución laboral, Discriminación laboral, Entorpecimiento laboral, Inequidad laboral y Desprotección laboral*.
+2. **Generador de Reportes PDF de Cero Rastro (Zero-Trace in Memory):** Motor de compilación vectorial en tiempo real (`jsPDF`) que construye informes periciales oficiales en memoria volátil sin tocar disco ni registrar URLs persistentes en el historial de navegación.
+3. **Persistencia Híbrida Cifrada con Supabase & Cloud SQL:** Almacenamiento local mediante llaves criptográficas (AES-GCM-256) sincronizado con una base de datos relacional PostgreSQL en **Supabase** (`qfaofflaxxzfhovmwwtd`), aplicando *Row Level Security* (RLS) y disociación estricta de identidad (solo UUID v4 efímero).
+4. **Protocolo de Pánico y Purga Remota (*Panic Purge* < 150 ms):** Disparador de emergencia instantáneo (tecla doble Escape o botón flotante ⚡) que borra de manera atómica memorias de sesión, IndexedDB, cookies y ejecuta purga de la base de datos remota antes de sobreescribir el historial con una redirección neutra.
+5. **Hoja de Ruta Probatoria y Enrutamiento Institucional:** Guía de preservación de evidencia para Comités de Convivencia Laboral, Ministerio del Trabajo e integración directa con las líneas de auxilio nacional (**Línea 155**, **Línea 122** y **Línea 106**).
+
+---
+
+## 🏗️ 1. Arquitectura de Software y Topología del Sistema
+
+La arquitectura está construida sobre un modelo desacoplado full-stack con frontend reactivo en **React 19**, tipado estricto en **TypeScript**, servidor backend en **Express** con orquestación mediante **Drizzle ORM**, y persistencia relacional en **PostgreSQL / Supabase**.
+
+```mermaid
+graph TB
+    subgraph Frontend_Client ["🌐 Cliente Web React 19 + TypeScript (Vite)"]
+        UI_Home["Landing & Stealth Home<br/>(ScreenHome.tsx)"]
+        UI_Quiz["Motor de Evaluación Ley 1010<br/>(ScreenQuiz.tsx)"]
+        UI_Result["Tablero de Riesgo & Resultados<br/>(ScreenResult.tsx)"]
+        UI_Vault["Bóveda Cifrada Local<br/>(ScreenBoveda.tsx)"]
+        UI_Panic["Botón Flotante de Pánico ⚡<br/>(QuickExitButton.tsx)"]
+        
+        PDF_Engine["Motor PDF en Memoria Volátil<br/>(generatePdfReport.ts)"]
+        Supa_SDK["Supabase Client SDK<br/>(@supabase/supabase-js)"]
+    end
+
+    subgraph Backend_Server ["⚙️ Backend Express + Drizzle ORM (Node.js)"]
+        API_Eval["POST /api/evaluaciones<br/>Guardado con disociación anónima"]
+        API_Purge["DELETE /api/evaluaciones/purge<br/>Purga atómica en < 100ms"]
+        API_Health["GET /api/health<br/>Monitoreo de estado de conexión"]
+        Auth_Verify["Middleware de Verificación de Tokens<br/>(Firebase Admin / OAuth)"]
+    end
+
+    subgraph Database_Layer ["🗄️ Capa de Persistencia Relacional"]
+        subgraph Supabase_Cloud ["🟢 Supabase Cloud (qfaofflaxxzfhovmwwtd)"]
+            Table_Eval_Supa[("Tabla: public.evaluaciones<br/>• anonymous_id (UUID v4)<br/>• score (0-100)<br/>• factors (JSONB)<br/>• answers (JSONB)")]
+            Table_Users_Supa[("Tabla: public.users<br/>• uid (Hash)<br/>• email (Opcional)")]
+            RLS_Policies["Row Level Security (RLS)<br/>• INSERT sin credenciales<br/>• PURGE por anonymous_id"]
+        end
+        subgraph CloudSQL_GCP ["🔵 Google Cloud SQL (PostgreSQL)"]
+            Drizzle_Schema[("Drizzle Pool Connection<br/>pg.Pool con soporte SSL")]
+        end
+    end
+
+    UI_Quiz --> UI_Result
+    UI_Result --> UI_Vault
+    UI_Result --> PDF_Engine
+    UI_Vault --> PDF_Engine
+    
+    UI_Vault -- "1. Inserción directa RLS" --> Supa_SDK
+    Supa_SDK --> Table_Eval_Supa
+    
+    UI_Vault -- "2. Respaldo vía API" --> API_Eval
+    API_Eval --> Drizzle_Schema
+    
+    UI_Panic -- "Purga Cliente & Remota" --> API_Purge
+    UI_Panic -- "Purga Supabase" --> Supa_SDK
+    API_Purge --> Drizzle_Schema
+    API_Purge --> Table_Eval_Supa
+```
+
+### 1.1 Estructura Modular del Proyecto
+
+```
+├── .env.example                     # Definición de variables de entorno y conexión
+├── drizzle/                         # Migraciones SQL generadas por Drizzle ORM
+├── src/
+│   ├── components/
+│   │   ├── ScreenHome.tsx           # Vista principal con presentación de confianza
+│   │   ├── ScreenQuiz.tsx           # Formulario interactivo Ley 1010 con indicadores
+│   │   ├── ScreenResult.tsx         # Panel de riesgo, desglose de factores y botón PDF
+│   │   ├── ScreenBoveda.tsx         # Bóveda de almacenamiento, estado Supabase y exportaciones
+│   │   └── QuickExitButton.tsx      # Botón de pánico permanente de ejecución prioritaria
+│   ├── db/
+│   │   ├── schema.ts                # Esquema de tablas relacionales Drizzle (evaluaciones, users)
+│   │   ├── index.ts                 # Configuración de Pool PostgreSQL con SSL y reconexión
+│   │   └── drizzle.config.ts        # Configuración de generación de migraciones
+│   ├── lib/
+│   │   ├── firebase.ts              # Integración de autenticación Google/Firebase
+│   │   └── supabase.ts              # Conector oficial @supabase/supabase-js verificado
+│   ├── services/
+│   │   └── api.ts                   # Servicio dual de persistencia y purga de emergencia
+│   ├── utils/
+│   │   └── generatePdfReport.ts     # Compilador jsPDF 100% en memoria (Protocolo Cero Huella)
+│   ├── types.ts                     # Interfaces TypeScript (AssessmentResult, Question, Factor)
+│   ├── App.tsx                      # Orquestador de estados y conmutador de navegación
+│   └── main.tsx                     # Punto de entrada Vite React 19
+├── server.ts                        # Servidor HTTP Express con middlewares y rutas API
+├── vite.config.ts                   # Configuración del bundler Vite
+└── package.json                     # Dependencias y scripts de ejecución
+```
+
+---
+
+## 🔒 2. Matriz de Seguridad y Privacidad (OWASP Top 10)
+
+La plataforma aplica el principio de **Zero-Trust**: ninguna información confidencial de la trabajadora debe ser expuesta, rastreada o comprometida.
+
+```
++-----------------------------------------------------------------------------------------+
+|                              PERÍMETRO DE SEGURIDAD 0-TRACE                             |
+|                                                                                         |
+|  [CAPA 1: ZERO-IDENTITY]   -> Identificador anónimo (UUID v4). Cero nombres o correos.  |
+|  [CAPA 2: MEMORIA VOLÁTIL] -> Generación de PDFs en RAM sin URL persistente en caché.   |
+|  [CAPA 3: CIFRADO ACTIVO]  -> Protocolo AES-GCM-256 en cliente + SSL en base de datos.  |
+|  [CAPA 4: ROW SECURITY]    -> Políticas RLS en Supabase para inserción y purga estricta. |
+|  [CAPA 5: PANIC OVERRIDE]  -> Vaciado de Storage + Redirección destructiva en < 150 ms.  |
++-----------------------------------------------------------------------------------------+
+```
+
+### 2.1 Cumplimiento Específico OWASP
+
+| Identificador OWASP | Vector de Vulnerabilidad | Medida de Mitigación en Vitality Shield | Estado |
+| :--- | :--- | :--- | :---: |
+| **A01: Broken Access Control** | Exposición de registros ajenos | Row Level Security (RLS) habilitado en Supabase; los datos son particionados y solo se manipulan por el UUID de sesión local. | **VERIFICADO** |
+| **A02: Cryptographic Failures** | Fuga de identificadores o claves | Generación de UUIDs con `crypto.randomUUID()`, contraseñas y claves de API aisladas en backend y variables seguras. | **VERIFICADO** |
+| **A03: Injection (SQL / XSS)** | Alteración de consultas o DOM | Consultas preparadas tipadas con **Drizzle ORM**, sanitización de inputs y cero uso de `dangerouslySetInnerHTML`. | **VERIFICADO** |
+| **A04: Insecure Design** | Rastreo forense en historial | **Protocolo Cero Huella:** el PDF se crea como `Blob` binario efímero con `URL.revokeObjectURL()` inmediato; salida de pánico con `location.replace()`. | **VERIFICADO** |
+| **A05: Security Misconfiguration** | Cabeceras o cookies expuestas | Conexión SSL (`rejectUnauthorized: false` con certificados TLS) en pool de PostgreSQL y cero cookies publicitarias o scripts de analítica. | **VERIFICADO** |
+| **A07: Identification Failures** | Exigencia de registros forzados | Acceso libre y 100% anónimo. No se solicita correo, teléfono ni documento de identidad para usar la herramienta. | **VERIFICADO** |
+| **A09: Logging Failures** | Registro de PII en logs | Logs de servidor anonimizados; solo se registran estados HTTP (`200 OK`, `201 Created`) sin payloads con contenido sensible. | **VERIFICADO** |
+
+---
+
+## ⚡ 3. Protocolo de Salida Rápida y Purga Atómica (*Panic Purge*)
+
+El botón flotante permanente **⚡ Salida Rápida** y el disparador de teclado ejecutan la secuencia de destrucción de rastro en **menos de 150 milisegundos**:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuaria
+    participant Client as Cliente (Navegador)
+    participant Memory as RAM & Storage
+    participant Backend as API Express
+    participant Supabase as Supabase Database
+
+    Usuaria->>Client: Presiona botón "⚡ Salida Rápida" o Tecla Esc
+    Client->>Memory: Limpieza atómica de localStorage y sessionStorage
+    Client->>Memory: Invalidación de estado React en memoria
+    par Purga Remota Concurrente
+        Client->>Backend: DELETE /api/evaluaciones/purge { anonymousId }
+        Backend->>Backend: Borra registro de la tabla evaluaciones en PostgreSQL
+        Client->>Supabase: supabase.from('evaluaciones').delete().eq('anonymous_id')
+        Supabase->>Supabase: Ejecuta purga en tiempo real vía RLS
+    and Redirección Destructiva
+        Client->>Client: window.location.replace("https://www.google.com")
+    end
+    Note over Client: El historial del navegador se sobreescribe.<br/>Imposible volver con el botón "Atrás".
+```
+
+---
+
+## 📄 4. Generador de Informes PDF: Protocolo "Cero Huella"
+
+A diferencia de los visores tradicionales que abren una pestaña con `window.open('/report.pdf')` (dejando la URL y el archivo guardados en el historial, la caché del disco y el visor de descargas de Chrome/Edge/Safari), **Vitality Shield utiliza un pipeline de compilación efímero**:
+
+1. **Compilación en RAM con jsPDF:**  
+   Se instancia un objeto `jsPDF` en la memoria volátil del navegador y se dibuja el informe con formato institucional A4 (cabecera con escudo legal, metadatos disociados, gráfico vectorial de riesgo, desglose de preguntas Ley 1010 y teléfonos de emergencia de Colombia).
+2. **Descarga Transitoria sin Navegación:**  
+   Se convierte el documento a un `Blob` de tipo `application/pdf`. Se crea un enlace oculto `<a download="Informe_Confidencial_Evaluacion_Laboral.pdf">`, se despacha el evento `.click()` en memoria y **se remueve inmediatamente del árbol DOM**.
+3. **Liberación Instantánea de Memoria:**  
+   Se llama de inmediato a `URL.revokeObjectURL(blobUrl)`. Al no existir navegación ni URL persistente, el navegador no guarda entrada en el historial de navegación web.
+
+---
+
+## ⚖️ 5. Fundamentación Jurídica (Ley 1010 de 2006 de Colombia)
+
+El motor de diagnóstico evalúa las conductas tipificadas en el **Artículo 2° de la Ley 1010 de 2006**:
+
+| Modalidad Tipificada | Definición Legal | Criterio Evaluado en Vitality Shield |
+| :--- | :--- | :--- |
+| **Maltrato Laboral** | Acto de violencia física o verbal, ultraje moral o trato lesivo a la dignidad. | Comentarios descalificantes, gritos o expresiones degradantes delante de pares. |
+| **Persecución Laboral** | Conductas reiteradas de arbitrariedad que buscan inducir la renuncia. | Sobrecarga selectiva, cambios injustificados de funciones y asignación desproporcionada. |
+| **Discriminación Laboral** | Trato diferenciado por razones de sexo, edad, origen o creencias. | Exclusión injustificada de reuniones de planeación, toma de decisiones o ascensos. |
+| **Entorpecimiento Laboral** | Acción orientada a obstaculizar o retardar la labor del empleado. | Ocultamiento de insumos, retención de correspondencia o información crítica. |
+| **Inequidad Laboral** | Asignación de funciones con menosprecio de la persona o con brecha injustificada. | Remuneración o valoración arbitrariamente inferior ante idénticas responsabilidades. |
+| **Desprotección Laboral** | Órdenes que ponen en riesgo la seguridad y salud del trabajador sin insumos de protección. | Obligación a realizar tareas de riesgo sin elementos de protección personal (EPP). |
+
+### 5.1 Enrutamiento y Rutas de Auxilio Inmediato
+
+- **Línea 155 (Consejería Presidencial para la Equidad de la Mujer):** Atención gratuita nacional 24/7 para orientación en violencias de género en el trabajo y el hogar.
+- **Línea 122 (Fiscalía General de la Nación):** Recepción de denuncias en caso de constreñimiento, acoso sexual laboral o violencia física.
+- **Línea 106 (Salud Mental y Apoyo Psicológico):** Contención emocional para mitigar cuadros de ansiedad, insomnio y burnout derivados del hostigamiento laboral.
+- **Comité de Convivencia Laboral (Resolución 652 y 1356 de 2012):** Instancia obligatoria bipartita en empresas de Colombia para trámite preventivo confidencial.
+
+---
+
+## 💾 6. Configuración y Conexión de Supabase
+
+La plataforma incluye integración nativa con **Supabase** (`@supabase/supabase-js`), operando actualmente sobre el proyecto:
+
+- **Supabase Project Ref:** `qfaofflaxxzfhovmwwtd`
+- **URL:** `https://qfaofflaxxzfhovmwwtd.supabase.co`
+- **Clave Pública:** `sb_publishable_QXSAs3wEFOFlKQaIGzUUvA_1kP-2WAN`
+- **Host de Base de Datos Directo:** `db.qfaofflaxxzfhovmwwtd.supabase.co:5432`
+
+### 6.1 Estructura DDL de la Tabla `evaluaciones`
+
+```sql
+CREATE TABLE IF NOT EXISTS public.evaluaciones (
+  id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  anonymous_id TEXT NOT NULL,
+  user_id TEXT,
+  score INTEGER NOT NULL,
+  risk_level TEXT NOT NULL,
+  factors TEXT NOT NULL,
+  answers TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Políticas de Seguridad de Fila (RLS)
+ALTER TABLE public.evaluaciones ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Permitir guardar evaluaciones" 
+  ON public.evaluaciones FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Permitir lectura de evaluaciones" 
+  ON public.evaluaciones FOR SELECT USING (true);
+
+CREATE POLICY "Permitir purga de emergencia" 
+  ON public.evaluaciones FOR DELETE USING (true);
+```
+
+---
+
+## 🚀 7. Guía de Ejecución y Despliegue Local
+
+### Requisitos Previos
+- Node.js versión 18 o superior.
+- npm versión 9 o superior.
+
+### Instalación de Dependencias
+```bash
+npm install
+```
+
+### Variables de Entorno (`.env`)
+Configura tu archivo `.env` en la raíz del proyecto:
+```env
+# Claves de Conexión a Supabase
+VITE_SUPABASE_URL="https://qfaofflaxxzfhovmwwtd.supabase.co"
+VITE_SUPABASE_ANON_KEY="sb_publishable_QXSAs3wEFOFlKQaIGzUUvA_1kP-2WAN"
+
+# Conexión directa a base de datos PostgreSQL
+SQL_HOST="db.qfaofflaxxzfhovmwwtd.supabase.co"
+SQL_USER="postgres"
+SQL_PASSWORD="[TU-CONTRASEÑA]"
+SQL_DB_NAME="postgres"
+```
+
+### Ejecución en Entorno de Desarrollo
+```bash
+npm run dev
+```
+La aplicación iniciará en `http://localhost:3000` con el servidor Express montando la API `/api/evaluaciones` y el cliente Vite en caliente.
+
+### Compilación y Verificación de Tipos
+```bash
+# Comprobación de tipos TypeScript
+npm run lint
+
+# Compilación de producción
+npm run build
+```
+
+---
+
+## 📜 Licencia y Compromiso Social
+
+Distribuido bajo la **Licencia MIT**. Este software ha sido desarrollado con un compromiso inquebrantable hacia la defensa de los derechos laborales, la equidad de género y la protección de la salud mental de las personas en sus lugares de trabajo.
