@@ -110,7 +110,114 @@ graph TB
 
 ---
 
-## 🔒 2. Matriz de Seguridad y Privacidad (OWASP Top 10)
+## 📊 2. Diagramas de Casos de Uso (UML Use Case Models)
+
+### 2.1 Diagrama de Casos de Uso General del Sistema
+
+El siguiente diagrama formal modela las interacciones entre los actores principales del ecosistema y los casos de uso del sistema **Vitality Shield**:
+
+```mermaid
+flowchart LR
+    %% Actores
+    Usuaria(["👩‍💼 Usuaria / Trabajadora<br/>(Víctima Potencial)"])
+    SupabaseDB[("☁️ Supabase PostgreSQL<br/>(qfaofflaxxzfhovmwwtd)")]
+    RedEmergencia["🚨 Central de Emergencias 123<br/>& Líneas de Asistencia (155, 122)"]
+
+    subgraph Sistema_VitalityShield ["🛡️ Sistema Vitality Shield (Límite del Sistema)"]
+        UC01(["<b>CU-01</b><br/>Realizar Diagnóstico Ley 1010"])
+        UC02(["<b>CU-02</b><br/>Consultar Resultados y Nivel de Riesgo"])
+        UC03(["<b>CU-03</b><br/>Generar Reporte PDF (0-Trace)"])
+        UC04(["<b>CU-04</b><br/>Guardar Evaluación en Bóveda Cifrada"])
+        UC05(["<b>CU-05</b><br/>Activar Salida Rápida (Purga Total < 150ms)"])
+        UC06(["<b>CU-06</b><br/>Disparar Botón de Pánico: Llamar 123"])
+        UC07(["<b>CU-07</b><br/>Contactar Líneas de Auxilio (155, 122, 106)"])
+        UC08(["<b>CU-08</b><br/>Conmutar Modo Camuflaje Visual"])
+        UC09(["<b>CU-09</b><br/>Eliminar Evidencias de la Base de Datos"])
+    end
+
+    %% Relaciones de la Usuaria
+    Usuaria --> UC01
+    Usuaria --> UC02
+    Usuaria --> UC03
+    Usuaria --> UC04
+    Usuaria --> UC05
+    Usuaria --> UC06
+    Usuaria --> UC07
+    Usuaria --> UC08
+
+    %% Inclusiones y extensiones
+    UC01 -.->|«include»| UC02
+    UC04 -.->|«include»| SupabaseDB
+    UC05 -.->|«include»| UC09
+    UC09 -.->|«interactúa»| SupabaseDB
+    UC06 -.->|«establece enlace»| RedEmergencia
+    UC07 -.->|«establece enlace»| RedEmergencia
+
+    %% Estilos
+    style Usuaria fill:#38bdf8,stroke:#0284c7,stroke-width:2px,color:#000
+    style RedEmergencia fill:#ef4444,stroke:#b91c1c,stroke-width:2px,color:#fff
+    style SupabaseDB fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff
+    style Sistema_VitalityShield fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#e2e8f0
+```
+
+### 2.2 Diagrama de Caso de Uso Detallado: Protocolo Botón de Pánico ("Llamar 123" y "Salida Rápida")
+
+```mermaid
+flowchart TD
+    subgraph Trigger ["🚨 Evento de Crisis / Riesgo Inmediato"]
+        A[Usuaria en peligro inminente o vigilada]
+    end
+
+    subgraph Decision ["Opciones de Pánico Disponibles en la Barra Flotante"]
+        B{"¿Qué acción requiere?"}
+        C["🚨 Botón: 'Llamar 123'<br/>(Emergencia Física o Amenaza Vital)"]
+        D["⚡ Botón: 'Salida Rápida'<br/>(Alguien se acerca / Borrar Rastros)"]
+    end
+
+    subgraph Canal123 ["Ruta 1: Marcación Directa 123"]
+        C --> C1["Apertura directa de tel:123 en el marcador móvil"]
+        C1 --> C2["Conexión inmediata con Central de Policía Nacional y Ambulancias"]
+        C2 --> C3["Atención de crisis, georreferenciación y despacho policial"]
+    end
+
+    subgraph RutaPurga ["Ruta 2: Protocolo Destructivo 0-Trace (< 150 ms)"]
+        D --> D1["1. Borrado instantáneo de sessionStorage y localStorage"]
+        D1 --> D2["2. Solicitud atómica DELETE a Supabase y PostgreSQL"]
+        D2 --> D3["3. Reemplazo destructivo del historial: window.location.replace"]
+        D3 --> D4["4. Redirección a portal neutro (Google o Camuflaje Educativo)"]
+    end
+
+    A --> B
+    B -->|Emergencia Extrema| C
+    B -->|Miradas Indiscretas| D
+
+    style C fill:#dc2626,stroke:#991b1b,stroke-width:2px,color:#fff
+    style D fill:#7c3aed,stroke:#5b21b6,stroke-width:2px,color:#fff
+    style C3 fill:#991b1b,stroke:#7f1d1d,stroke-width:2px,color:#fff
+    style D4 fill:#0e7490,stroke:#155e75,stroke-width:2px,color:#fff
+```
+
+### 2.3 Especificación Estructurada de Casos de Uso Críticos
+
+| Campo | Caso de Uso: **CU-06 Disparar Botón de Pánico 'Llamar 123'** |
+| :--- | :--- |
+| **Actor Principal** | Usuaria Trabajadora (en riesgo crítico o violencia física inminente). |
+| **Precondición** | La aplicación se encuentra en ejecución en cualquier pantalla (Inicio, Cuestionario, Diagnóstico, Bóveda). |
+| **Disparador** | Tocar el botón flotante rojo `🚨 Llamar 123`. |
+| **Flujo Principal** | 1. El sistema invoca el protocolo telefónico `tel:123`.<br/>2. El sistema operativo abre el marcador telefónico nativo pre-marcando el número 123.<br/>3. La llamada se enlaza sin costo a la Policía Nacional y centros de despacho de emergencias de Colombia.<br/>4. La usuaria recibe asistencia policial o médica de urgencia. |
+| **Postcondición** | Comunicación establecida con la central pública de emergencias 123. |
+
+| Campo | Caso de Uso: **CU-05 Activar Salida Rápida y Purga Atómica** |
+| :--- | :--- |
+| **Actor Principal** | Usuaria Trabajadora. |
+| **Precondición** | La usuaria ha respondido preguntas o tiene información cargada en pantalla. |
+| **Disparador** | Clic en el botón púrpura `⚡ Salida Rápida` o presionar la tecla `Escape`. |
+| **Flujo Principal** | 1. El cliente ejecuta limpieza de memorias locales (`localStorage`, `sessionStorage`).<br/>2. Se despacha señal HTTP de purga a Supabase (`DELETE /api/evaluaciones/purge`).<br/>3. El navegador sobreescribe el historial de navegación para evitar el uso del botón 'Atrás'.<br/>4. Se redirige al buscador neutro en menos de 150 milisegundos. |
+| **Postcondición** | 0 rastros de diagnóstico o navegación en el dispositivo; la base de datos queda limpia. |
+
+---
+
+## 🔒 3. Matriz de Seguridad y Privacidad (OWASP Top 10)
 
 La plataforma aplica el principio de **Zero-Trust**: ninguna información confidencial de la trabajadora debe ser expuesta, rastreada o comprometida.
 
