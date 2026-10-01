@@ -311,16 +311,37 @@ El motor de diagnóstico evalúa las conductas tipificadas en el **Artículo 2°
 
 ---
 
-## 💾 6. Configuración y Conexión de Supabase
+## 💾 6. Configuración de Base de Datos (Supabase)
 
-La plataforma incluye integración nativa con **Supabase** (`@supabase/supabase-js`), operando actualmente sobre el proyecto:
+La plataforma utiliza **Supabase** como capa relacional y de autenticación segura. Por directrices de seguridad, nunca se deben subir claves secretas ni contraseñas al repositorio público.
 
-- **Supabase Project Ref:** `qfaofflaxxzfhovmwwtd`
-- **URL:** `https://qfaofflaxxzfhovmwwtd.supabase.co`
-- **Clave Pública:** `sb_publishable_QXSAs3wEFOFlKQaIGzUUvA_1kP-2WAN`
-- **Host de Base de Datos Directo:** `db.qfaofflaxxzfhovmwwtd.supabase.co:5432`
+### 6.1 ¿De dónde se obtienen las variables de Supabase?
 
-### 6.1 Estructura DDL de la Tabla `evaluaciones`
+Para conectar la aplicación con tu propio proyecto de Supabase, obtén tus credenciales desde tu panel de control:
+
+1. Inicia sesión en [Supabase Dashboard](https://supabase.com/dashboard) y selecciona tu proyecto.
+2. En el menú lateral izquierdo, haz clic en el icono de engranaje **Project Settings** (⚙️).
+3. Selecciona la pestaña **Data API** (o **API**).
+4. Encontrarás los dos valores requeridos:
+   - **`VITE_SUPABASE_URL`**: Copia el valor del campo **Project URL** (tiene el formato `https://<tu-id-de-proyecto>.supabase.co`).
+   - **`VITE_SUPABASE_ANON_KEY`**: En la sección **Project API keys**, copia la clave marcada como **`anon` `public`** (o publishable key).
+
+```
++--------------------------------------------------------------------------------+
+|                         SUPABASE DASHBOARD (PROJECT SETTINGS)                  |
+|                                                                                |
+|  ⚙️ Settings  ->  API                                                           |
+|                                                                                |
+|  [Project URL]      https://xxxxxxxxxxxxxxxxxxxx.supabase.co  <-- VITE_SUPABASE_URL
+|                                                                                |
+|  [Project API Keys]                                                            |
+|  • anon / public    eyJh...... (Clave pública cliente)       <-- VITE_SUPABASE_ANON_KEY
++--------------------------------------------------------------------------------+
+```
+
+### 6.2 Estructura DDL de la Tabla `evaluaciones`
+
+Ejecuta este script en el **SQL Editor** de tu panel de Supabase para inicializar la tabla con políticas de seguridad de fila (*Row Level Security*):
 
 ```sql
 CREATE TABLE IF NOT EXISTS public.evaluaciones (
@@ -334,60 +355,106 @@ CREATE TABLE IF NOT EXISTS public.evaluaciones (
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Políticas de Seguridad de Fila (RLS)
+-- Habilitar Row Level Security (RLS)
 ALTER TABLE public.evaluaciones ENABLE ROW LEVEL SECURITY;
 
+-- Permitir inserción anónima de diagnósticos
 CREATE POLICY "Permitir guardar evaluaciones" 
   ON public.evaluaciones FOR INSERT WITH CHECK (true);
 
+-- Permitir lectura de evaluaciones
 CREATE POLICY "Permitir lectura de evaluaciones" 
   ON public.evaluaciones FOR SELECT USING (true);
 
+-- Permitir purga atómica de emergencia
 CREATE POLICY "Permitir purga de emergencia" 
   ON public.evaluaciones FOR DELETE USING (true);
 ```
 
 ---
 
-## 🚀 7. Guía de Ejecución y Despliegue Local
+## 🚀 7. Guía de Ejecución Local
 
-### Requisitos Previos
-- Node.js versión 18 o superior.
-- npm versión 9 o superior.
+### Variables de Entorno Locales (`.env`)
+Crea un archivo llamado `.env` en la raíz de tu proyecto tomando como base `.env.example`:
 
-### Instalación de Dependencias
-```bash
-npm install
-```
-
-### Variables de Entorno (`.env`)
-Configura tu archivo `.env` en la raíz del proyecto:
 ```env
-# Claves de Conexión a Supabase
-VITE_SUPABASE_URL="https://qfaofflaxxzfhovmwwtd.supabase.co"
-VITE_SUPABASE_ANON_KEY="sb_publishable_QXSAs3wEFOFlKQaIGzUUvA_1kP-2WAN"
-
-# Conexión directa a base de datos PostgreSQL
-SQL_HOST="db.qfaofflaxxzfhovmwwtd.supabase.co"
-SQL_USER="postgres"
-SQL_PASSWORD="[TU-CONTRASEÑA]"
-SQL_DB_NAME="postgres"
+# Claves de Conexión a Supabase (obtenidas de Project Settings > Data API)
+VITE_SUPABASE_URL="https://<TU-PROJECT-ID>.supabase.co"
+VITE_SUPABASE_ANON_KEY="<TU-CLAVE-PUBLICA-ANON>"
 ```
 
-### Ejecución en Entorno de Desarrollo
+### Instalación y Ejecución
 ```bash
+# 1. Instalar dependencias
+npm install
+
+# 2. Iniciar servidor local de desarrollo
 npm run dev
-```
-La aplicación iniciará en `http://localhost:3000` con el servidor Express montando la API `/api/evaluaciones` y el cliente Vite en caliente.
 
-### Compilación y Verificación de Tipos
-```bash
-# Comprobación de tipos TypeScript
-npm run lint
-
-# Compilación de producción
+# 3. Compilación para producción
 npm run build
 ```
+
+---
+
+## ☁️ 8. Tutorial Paso a Paso: Despliegue en Vercel
+
+Este proyecto incluye el archivo `vercel.json` preconfigurado en la raíz, permitiendo que Vercel reconozca automáticamente la arquitectura de Vite y configure el enrutamiento para Single Page Applications (SPA).
+
+```mermaid
+flowchart LR
+    A["Repositorio GitHub<br/>(Rama main)"] -->|Importar Proyecto| B["Vercel Cloud"]
+    B -->|Detecta vercel.json| C["Vite Builder<br/>npm run build"]
+    D["Supabase Dashboard<br/>Project Settings > API"] -.->|Inyectar Variables| B
+    C -->|Publicación Inmediata| E["Sitio en Producción<br/>https://tu-app.vercel.app"]
+
+    style A fill:#1e293b,stroke:#475569,color:#fff
+    style B fill:#000,stroke:#fff,color:#fff
+    style D fill:#10b981,stroke:#047857,color:#fff
+    style E fill:#0284c7,stroke:#0369a1,color:#fff
+```
+
+### Paso 1: Subir tu código a GitHub
+Asegúrate de tener tus últimos cambios sincronizados en tu repositorio de GitHub:
+```bash
+git add .
+git commit -m "Preparar proyecto para despliegue en Vercel"
+git push origin main
+```
+
+### Paso 2: Crear el Proyecto en Vercel
+1. Ingresa a [Vercel](https://vercel.com) e inicia sesión con tu cuenta de **GitHub**.
+2. En tu panel principal (*Dashboard*), haz clic en el botón **"Add New..."** y selecciona **"Project"**.
+3. En la lista de repositorios, localiza tu proyecto y haz clic en **"Import"**.
+
+### Paso 3: Configuración del Proyecto
+Vercel leerá la configuración de forma automática:
+- **Framework Preset:** Detectará `Vite`.
+- **Root Directory:** `./`
+- **Build Command:** `npm run build` (o `vite build`)
+- **Output Directory:** `dist`
+
+### Paso 4: Configurar las Variables de Entorno en Vercel
+En la sección desplegable **Environment Variables**:
+
+1. Puedes hacer clic en **`Import .env`** y pegar el siguiente formato:
+   ```env
+   VITE_SUPABASE_URL=https://<TU-PROJECT-ID>.supabase.co
+   VITE_SUPABASE_ANON_KEY=<TU-CLAVE-PUBLICA-ANON>
+   ```
+2. O ingresarlas manualmente en las casillas:
+   - **Key:** `VITE_SUPABASE_URL` | **Value:** La URL de tu proyecto Supabase.
+   - Presiona **+ Add More**.
+   - **Key:** `VITE_SUPABASE_ANON_KEY` | **Value:** Tu clave pública anónima de Supabase.
+
+> 💡 **Nota de Seguridad:** Estas variables corresponden a la URL de conexión y la clave pública (`anon/public`), las cuales están diseñadas para interactuar de forma segura desde el navegador bajo las políticas de seguridad **RLS** configuradas en Supabase. Nunca coloques claves con el rol `service_role` en Vercel ni en el frontend.
+
+### Paso 5: Despliegue y Validación
+1. Haz clic en el botón **"Deploy"**.
+2. Vercel compilará la aplicación en aproximadamente 30 a 50 segundos.
+3. Al finalizar, recibirás una URL de producción (ej. `https://tu-proyecto.vercel.app`) con certificado SSL activo y protección contra caídas.
+4. **Despliegues continuos automáticos:** A partir de este momento, cada vez que hagas `git push` a tu rama principal en GitHub, Vercel compilará y actualizará tu aplicación automáticamente en tiempo real.
 
 ---
 
