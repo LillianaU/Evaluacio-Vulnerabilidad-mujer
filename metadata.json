@@ -1,0 +1,6 @@
+{
+  "name": "Vitality Shield - AcosoLaboralProtector",
+  "description": "Plataforma confidencial y segura de orientación y diagnóstico ante acoso laboral con protocolo de salida rápida 0-Trace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
