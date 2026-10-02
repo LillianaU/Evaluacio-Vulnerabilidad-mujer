@@ -12,6 +12,9 @@
 
 > 🌐 **Aplicación en Vivo (Despliegue Oficial en Vercel):**  
 > 👉 **[https://evaluacio-vulnerabilidad-mujer.vercel.app](https://evaluacio-vulnerabilidad-mujer.vercel.app)**
+> 🌐 **Aplicación en Vivo (Despliegue Oficial en www.netlify.com):**  
+>👍 **[[(https://evaluacio-vulnerabilidad-mujer.netlify.app/](https://evaluacio-vulnerabilidad-mujer.netlify.app/ )**
+
 
 ---
 
