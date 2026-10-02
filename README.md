@@ -518,6 +518,39 @@ En la sección desplegable **Environment Variables**:
 
 ---
 
+## 🚀 9. Despliegue en GitHub Pages y Automatización con Workflows
+
+> 🌐 **URL de GitHub Pages:**  
+> 👉 **[https://lillianau.github.io/Evaluacio-Vulnerabilidad-mujer/](https://lillianau.github.io/Evaluacio-Vulnerabilidad-mujer/)**
+
+### 9.1 ¿Qué es un Workflow en GitHub?
+Un **Workflow** (flujo de trabajo) es una serie de instrucciones automatizadas que los servidores en la nube de GitHub ejecutan de forma autónoma.
+- Se guardan siempre en la ruta obligatoria: `.github/workflows/*.yml`.
+- Se disparan por eventos (por ejemplo: cada vez que haces `git push origin main`).
+- En este proyecto, el archivo [deploy.yml](.github/workflows/deploy.yml) actúa como un obrero automatizado que:
+  1. Enciende una máquina virtual en Linux (`ubuntu-latest`).
+  2. Descarga el código del repositorio.
+  3. Instala las dependencias con `npm install`.
+  4. Compila el frontend React con Vite (`npm run build`), generando los archivos listos para producción en la carpeta `dist`.
+  5. Publica de manera automática los archivos estáticos compilados en los servidores de GitHub Pages.
+
+### 9.2 Modificaciones aplicadas en el Workflow (`deploy.yml`)
+Para garantizar la compatibilidad sin romper Vercel ni Netlify:
+- **Problema previo:** El workflow utilizaba `npm ci` con `cache: 'npm'`, lo cual requería obligatoriamente un archivo `package-lock.json`. Como el repositorio utiliza `bun.lock` y `package.json`, GitHub Actions fallaba antes de compilar y GitHub Pages mostraba el código crudo (pantalla en blanco).
+- **Ajuste realizado:** Se actualizó a `npm install` directo y se retiró la validación estricta de caché para que GitHub Actions instale las dependencias limpiamente y construya el paquete `dist` sin errores.
+- **Aislamiento e Inmunidad:** Este cambio **no altera en nada a Vercel ni a Netlify**, ya que esas plataformas no leen los archivos de GitHub Actions y continúan ejecutando sus despliegues independientes a través de sus propios conectores.
+
+### 9.3 Configuración requerida en la Web de GitHub
+Para que GitHub Pages active el despliegue mediante el workflow:
+1. Abre tu repositorio en GitHub: [https://github.com/LillianaU/Evaluacio-Vulnerabilidad-mujer](https://github.com/LillianaU/Evaluacio-Vulnerabilidad-mujer).
+2. Dirígete a la pestaña **Settings** (Configuración) en la barra superior.
+3. En el menú vertical izquierdo, selecciona **Pages**.
+4. En el apartado **Build and deployment**:
+   - En **Source**, haz clic en el selector y cambia de *"Deploy from a branch"* a **"GitHub Actions"**.
+5. Al hacer `git push` a `main`, la pestaña **Actions** ejecutará el workflow y el sitio web estará en línea con la aplicación cargada correctamente.
+
+---
+
 ## 📜 Licencia y Compromiso Social
 
 Distribuido bajo la **Licencia MIT**. Este software ha sido desarrollado con un compromiso inquebrantable hacia la defensa de los derechos laborales, la equidad de género y la protección de la salud mental de las personas en sus lugares de trabajo.
