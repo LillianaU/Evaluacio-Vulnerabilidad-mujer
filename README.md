@@ -529,15 +529,15 @@ Un **Workflow** (flujo de trabajo) es una serie de instrucciones automatizadas q
 - Se disparan por eventos (por ejemplo: cada vez que haces `git push origin main`).
 - En este proyecto, el archivo [deploy.yml](.github/workflows/deploy.yml) actúa como un obrero automatizado que:
   1. Enciende una máquina virtual en Linux (`ubuntu-latest`).
-  2. Descarga el código del repositorio.
-  3. Instala las dependencias con `npm install`.
-  4. Compila el frontend React con Vite (`npm run build`), generando los archivos listos para producción en la carpeta `dist`.
+  2. Instala **Bun** (`oven-sh/setup-bun@v2`), el mismo motor de ejecución ultrarrápido utilizado en Vercel.
+  3. Instala las dependencias idénticas a partir de `bun.lock` con `bun install --frozen-lockfile`.
+  4. Compila el frontend React con Vite (`bun run build`), generando los archivos listos para producción en la carpeta `dist`.
   5. Publica de manera automática los archivos estáticos compilados en los servidores de GitHub Pages.
 
 ### 9.2 Modificaciones aplicadas en el Workflow (`deploy.yml`)
 Para garantizar la compatibilidad sin romper Vercel ni Netlify:
-- **Problema previo:** El workflow utilizaba `npm ci` con `cache: 'npm'`, lo cual requería obligatoriamente un archivo `package-lock.json`. Como el repositorio utiliza `bun.lock` y `package.json`, GitHub Actions fallaba antes de compilar y GitHub Pages mostraba el código crudo (pantalla en blanco).
-- **Ajuste realizado:** Se actualizó a `npm install` directo y se retiró la validación estricta de caché para que GitHub Actions instale las dependencias limpiamente y construya el paquete `dist` sin errores.
+- **Problema previo:** El workflow utilizaba Node y `npm`, pero este proyecto utiliza `bun.lock`. Por ello, `npm` fallaba al intentar resolver el árbol de dependencias de Bun, y GitHub Pages terminaba mostrando el código crudo (pantalla en blanco).
+- **Ajuste realizado:** Se configuró el workflow para utilizar **Bun** directamente (`bun install --frozen-lockfile` y `bun run build`), logrando una compilación 100% idéntica y consistente con la de Vercel.
 - **Aislamiento e Inmunidad:** Este cambio **no altera en nada a Vercel ni a Netlify**, ya que esas plataformas no leen los archivos de GitHub Actions y continúan ejecutando sus despliegues independientes a través de sus propios conectores.
 
 ### 9.3 Configuración requerida en la Web de GitHub
