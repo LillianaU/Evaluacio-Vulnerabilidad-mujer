@@ -1,132 +1,164 @@
-import { Question, AssessmentResult } from '../types';
+import { Question, AssessmentResult, AnswersMap, DetectedFactor } from '../types';
+
+export const FREQUENCY_OPTIONS = [
+  { points: 0, label: 'Nunca', sub: 'No ha ocurrido' },
+  { points: 1, label: 'Ocasionalmente', sub: '1 o 2 veces aisladas' },
+  { points: 2, label: 'Frecuentemente', sub: 'Varias veces al mes' },
+  { points: 3, label: 'Constantemente', sub: 'De forma sistemática' },
+];
+
+export const INITIAL_ANSWERS: AnswersMap = {
+  q1: null,
+  q2: null,
+  q3: null,
+  q4: null,
+  q5: null,
+};
 
 export const QUESTIONS_DATA: Question[] = [
   {
     id: 'q1',
-    category: 'Intimidación & Maltrato',
-    legalArticle: 'Ley 1010 Art. 2 (Maltrato)',
-    title: 'Descalificación y comentarios hostiles',
-    description: '¿Has recibido gritos, insultos, comentarios sarcásticos o descalificaciones injustificadas frente a otros o en privado?',
-    options: [
-      { label: 'Nunca me ha sucedido', points: 0 },
-      { label: 'Rara vez (episodio aislado)', points: 1 },
-      { label: 'Con frecuencia (varias veces al mes)', points: 2 },
-      { label: 'Constantemente (semanal o diario)', points: 3 },
-    ],
+    category: 'Maltrato Laboral',
+    title: 'Maltrato laboral y descalificación',
+    legalRef: 'Art. 2 Num. 1 · Ley 1010 de 2006',
+    legalArticle: 'Ley 1010 Art. 2 Num. 1',
+    description:
+      '¿Recibes comentarios humillantes, gritos, descalificaciones públicas o privadas sobre tu dignidad, aspecto o desempeño?',
+    factorLabel: 'Maltrato laboral y vulneración de la dignidad',
+    options: FREQUENCY_OPTIONS,
   },
   {
     id: 'q2',
-    category: 'Persecución & Sobrecarga',
-    legalArticle: 'Ley 1010 Art. 2 (Persecución)',
-    title: 'Sobrecarga selectiva y plazos irreales',
-    description: '¿Te imponen cargas de trabajo desproporcionadas, horarios arbitrarios o exigencias inalcanzables que no se exigen a tus pares?',
-    options: [
-      { label: 'Nunca', points: 0 },
-      { label: 'Rara vez', points: 1 },
-      { label: 'Con frecuencia', points: 2 },
-      { label: 'Constantemente', points: 3 },
-    ],
+    category: 'Persecución Laboral',
+    title: 'Persecución y sobrecarga desproporcionada',
+    legalRef: 'Art. 2 Num. 2 · Ley 1010 de 2006',
+    legalArticle: 'Ley 1010 Art. 2 Num. 2',
+    description:
+      '¿Te asignan cargas excesivas de trabajo, plazos imposibles o cambios arbitrarios de horario buscando inducir tu renuncia?',
+    factorLabel: 'Persecución laboral y sobrecarga reiterada',
+    options: FREQUENCY_OPTIONS,
   },
   {
     id: 'q3',
     category: 'Entorpecimiento Laboral',
-    legalArticle: 'Ley 1010 Art. 2 (Entorpecimiento)',
-    title: 'Ocultamiento de información y bloqueo de herramientas',
-    description: '¿Te niegan el acceso a datos esenciales, correos o insumos de trabajo indispensables para poder cumplir tus metas?',
-    options: [
-      { label: 'Nunca', points: 0 },
-      { label: 'Rara vez', points: 1 },
-      { label: 'Con frecuencia', points: 2 },
-      { label: 'Constantemente', points: 3 },
-    ],
+    title: 'Entorpecimiento laboral',
+    legalRef: 'Art. 2 Num. 4 · Ley 1010 de 2006',
+    legalArticle: 'Ley 1010 Art. 2 Num. 4',
+    description:
+      '¿Ocultan información clave, bloquean herramientas o destruyen/retrasan insumos necesarios para que cumplas tus funciones?',
+    factorLabel: 'Entorpecimiento deliberado de funciones',
+    options: FREQUENCY_OPTIONS,
   },
   {
     id: 'q4',
-    category: 'Aislamiento & Inequidad',
-    legalArticle: 'Ley 1010 Art. 2 (Inequidad y Discriminación)',
-    title: 'Aislamiento social y exclusión deliberada',
-    description: '¿Te excluyen de reuniones clave, decisiones del área o grupos de comunicación laboral afectando tu integración?',
-    options: [
-      { label: 'Nunca', points: 0 },
-      { label: 'Rara vez', points: 1 },
-      { label: 'Con frecuencia', points: 2 },
-      { label: 'Constantemente', points: 3 },
-    ],
+    category: 'Inequidad y Aislamiento',
+    title: 'Inequidad y aislamiento laboral',
+    legalRef: 'Art. 2 Num. 3 · Ley 1010 de 2006',
+    legalArticle: 'Ley 1010 Art. 2 Num. 3',
+    description:
+      '¿Te excluyen sistemáticamente de reuniones, comunicaciones internas o recibes trato discriminatorio frente a tus pares?',
+    factorLabel: 'Aislamiento y discriminación laboral',
+    options: FREQUENCY_OPTIONS,
   },
   {
     id: 'q5',
-    category: 'Amenazas e Intimidación Sutil',
-    legalArticle: 'Ley 1010 Art. 2 (Desprotección e Intimidación)',
-    title: 'Presión para renunciar o amenazas veladas',
-    description: '¿Has recibido advertencias directas o indirectas insinuando tu despido, desmejora salarial o afectación reputacional si reclamas?',
-    options: [
-      { label: 'Nunca', points: 0 },
-      { label: 'Rara vez', points: 1 },
-      { label: 'Con frecuencia', points: 2 },
-      { label: 'Constantemente', points: 3 },
-    ],
+    category: 'Desprotección e Intimidación',
+    title: 'Desprotección e intimidación sutil',
+    legalRef: 'Art. 2 Num. 5 y 6 · Ley 1010 de 2006',
+    legalArticle: 'Ley 1010 Art. 2 Num. 5 y 6',
+    description:
+      '¿Recibes amenazas veladas de despido, represalias o te asignan tareas sin protocolos mínimos de seguridad y bienestar?',
+    factorLabel: 'Intimidación y desprotección laboral',
+    options: FREQUENCY_OPTIONS,
   },
 ];
 
 export const DEFAULT_ASSESSMENT: AssessmentResult = {
-  score: 85,
-  riskLevel: 'alto',
-  factors: [
-    'Intimidación sutil',
-    'Sobrecarga selectiva',
-    'Persecución laboral reiterada',
-  ],
-  answeredCount: 5,
+  score: 0,
+  riskLevel: 'bajo',
+  riskLabel: 'Riesgo Bajo',
+  factors: ['Sin indicios registrados en esta sesión'],
+  detectedFactors: [],
+  answeredCount: 0,
   totalQuestions: 5,
-  timestamp: new Date().toISOString(),
+  timestamp: new Date().toLocaleString('es-CO', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }),
   anonymousId: 'uuid-v4-anonimo-89f2',
 };
 
-export function calculateAssessment(answers: Record<string, number>): AssessmentResult {
-  const keys = Object.keys(answers);
-  if (keys.length === 0) {
-    return DEFAULT_ASSESSMENT;
-  }
+export function calculateAssessment(
+  answers: Record<string, number | null>,
+  anonymousId = 'uuid-v4-anonimo-89f2'
+): AssessmentResult {
+  const weights: Record<'q1' | 'q2' | 'q3' | 'q4' | 'q5', number> = {
+    q1: 1.15,
+    q2: 1.1,
+    q3: 1.0,
+    q4: 1.0,
+    q5: 1.1,
+  };
 
-  let totalPoints = 0;
-  const maxPossible = QUESTIONS_DATA.length * 3;
+  let weightedSum = 0;
+  let maxWeighted = 0;
+  let answeredCount = 0;
+
+  const detectedFactors: DetectedFactor[] = [];
   const factors: string[] = [];
 
   for (const q of QUESTIONS_DATA) {
-    const pts = answers[q.id] ?? 0;
-    totalPoints += pts;
+    const raw = answers[q.id];
+    if (raw !== null && raw !== undefined) {
+      answeredCount += 1;
+    }
+    const val = raw ?? 0;
+    const w = weights[q.id];
+    weightedSum += val * w;
+    maxWeighted += 3 * w;
 
-    if (pts >= 2) {
-      if (q.id === 'q1') factors.push('Descalificación verbal');
-      if (q.id === 'q2') factors.push('Sobrecarga selectiva');
-      if (q.id === 'q3') factors.push('Entorpecimiento laboral');
-      if (q.id === 'q4') factors.push('Aislamiento profesional');
-      if (q.id === 'q5') factors.push('Intimidación sutil');
+    if (val >= 1) {
+      detectedFactors.push({
+        id: q.id,
+        title: q.factorLabel,
+        legalRef: q.legalRef,
+        severity:
+          val === 3 ? 'Severidad Alta' : val === 2 ? 'Severidad Moderada' : 'Indicio Inicial',
+        points: val,
+      });
+      factors.push(q.factorLabel);
     }
   }
 
   if (factors.length === 0) {
-    factors.push('Sin indicios recurrentes de acoso');
+    factors.push('Sin indicios significativos registrados');
   }
 
-  const normalizedScore = Math.min(100, Math.round((totalPoints / maxPossible) * 100));
+  const normalized = Math.round((weightedSum / maxWeighted) * 100);
+  const score = Math.min(100, Math.max(0, normalized));
 
   let riskLevel: 'bajo' | 'medio' | 'alto' = 'bajo';
-  if (normalizedScore >= 65) {
+  let riskLabel = 'Riesgo Bajo';
+  if (score >= 65) {
     riskLevel = 'alto';
-  } else if (normalizedScore >= 35) {
+    riskLabel = 'Riesgo Alto';
+  } else if (score >= 35) {
     riskLevel = 'medio';
-  } else {
-    riskLevel = 'bajo';
+    riskLabel = 'Riesgo Medio';
   }
 
   return {
-    score: normalizedScore,
+    score,
     riskLevel,
+    riskLabel,
     factors,
-    answeredCount: keys.length,
+    detectedFactors,
+    answeredCount,
     totalQuestions: QUESTIONS_DATA.length,
-    timestamp: new Date().toISOString(),
-    anonymousId: 'uuid-v4-anonimo-89f2',
+    timestamp: new Date().toLocaleString('es-CO', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }),
+    anonymousId,
   };
 }

@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { ScreenType, AssessmentResult } from './types';
-import { DEFAULT_ASSESSMENT, calculateAssessment } from './data/assessmentData';
+import React, { useState, useMemo } from 'react';
+import { ScreenType, AnswersMap, QuestionId } from './types';
+import { INITIAL_ANSWERS, calculateAssessment } from './data/assessmentData';
+import { EtherealFloralBackdrop } from './components/EtherealFloralBackdrop';
 import { Header } from './components/Header';
 import { BottomNav } from './components/BottomNav';
 import { QuickExitButton } from './components/QuickExitButton';
@@ -19,107 +20,131 @@ import { purgeAssessmentFromDatabase } from './services/api';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('inicio');
+  const [answers, setAnswers] = useState<AnswersMap>(INITIAL_ANSWERS);
+  const [sessionUuid, setSessionUuid] = useState<string>('uuid-v4-anonimo-89f2');
+  const [isSavedInVault, setIsSavedInVault] = useState<boolean>(false);
+  const [zeroTraceAutoPurge, setZeroTraceAutoPurge] = useState<boolean>(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Initial answers preset matching the 85/100 score in the reference design
-  const [answers, setAnswers] = useState<Record<string, number>>({
-    q1: 2, // Descalificación hostil recurrente
-    q2: 3, // Sobrecarga selectiva y plazos imposibles
-    q3: 2, // Entorpecimiento laboral
-    q4: 3, // Aislamiento profesional deliberado
-    q5: 3, // Intimidación sutil
-  });
+  const assessmentResult = useMemo(
+    () => calculateAssessment(answers, sessionUuid),
+    [answers, sessionUuid]
+  );
 
-  const [assessment, setAssessment] = useState<AssessmentResult>(DEFAULT_ASSESSMENT);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2800);
+  };
 
-  // Recalculate assessment whenever answers change
-  useEffect(() => {
-    const updated = calculateAssessment(answers);
-    setAssessment(updated);
-  }, [answers]);
-
-  const handleAnswerChange = (questionId: string, points: number) => {
+  const handleAnswerChange = (questionId: QuestionId, points: number) => {
     setAnswers((prev) => ({
       ...prev,
       [questionId]: points,
     }));
   };
 
-  const handleSetAllAnswers = (newAnswers: Record<string, number>) => {
-    setAnswers(newAnswers);
+  const handleLoadSampleCase = () => {
+    setAnswers({
+      q1: 3,
+      q2: 3,
+      q3: 2,
+      q4: 2,
+      q5: 3,
+    });
+    showToast('Caso tipo cargado (escenario de alto riesgo 87/100).');
   };
 
-  // Emergency Panic: 0-trace purge and switch to AeroSalud Protocol or decoy
+  // Emergency Panic: 0-trace purge and switch to AeroSalud Protocol
   const handleQuickExit = () => {
     try {
       sessionStorage.clear();
-      localStorage.removeItem('vitality_shield_temp_session');
+      localStorage.clear();
+      purgeAssessmentFromDatabase(sessionUuid);
     } catch {
-      // ignore
+      // ignore sandbox errors
     }
+    setAnswers(INITIAL_ANSWERS);
+    setIsSavedInVault(false);
+    setSessionUuid(`uuid-v4-anonimo-${Math.floor(1000 + Math.random() * 9000)}`);
     setCurrentScreen('aerosalud');
   };
 
   const handlePurgeAndRedirectGoogle = () => {
     try {
-      localStorage.clear();
       sessionStorage.clear();
-      // Purge from cloud database asynchronously
-      purgeAssessmentFromDatabase(assessment.anonymousId);
+      localStorage.clear();
+      purgeAssessmentFromDatabase(sessionUuid);
     } catch {
-      // ignore
+      // ignore sandbox errors
     }
+    setAnswers(INITIAL_ANSWERS);
+    setIsSavedInVault(false);
     window.location.replace('https://www.google.com/search?q=recetas+saludables+faciles');
   };
 
-  const handleSafeExit = () => {
-    // Graceful exit
-    try {
-      sessionStorage.clear();
-    } catch {
-      // ignore
-    }
-    setCurrentScreen('inicio');
-  };
+  // Vista Camuflaje a pantalla completa
+  if (currentScreen === 'camuflaje') {
+    return <ScreenCamouflage onReturnToApp={() => setCurrentScreen('inicio')} />;
+  }
 
   return (
-    <div className="bg-[#0a0e1a] text-[#e0e8f0] font-body min-h-screen flex flex-col selection:bg-[#7dd3fc]/20 selection:text-[#7dd3fc]">
-      {/* Top App Header */}
-      {currentScreen !== 'camuflaje' && (
-        <Header currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+    <div className="min-h-screen relative text-white flex flex-col selection:bg-pink-400 selection:text-purple-950">
+      {/* Fondo etéreo con flores espectrales, estrellas y resplandores púrpura/rosa */}
+      <EtherealFloralBackdrop />
+
+      {/* Encabezado global (se adapta a AeroSalud y se oculta en Camuflaje) */}
+      <Header currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+
+      {/* Notificación flotante sutil */}
+      {toastMessage && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-[#231136]/95 text-pink-100 text-xs font-semibold border border-pink-300/50 shadow-xl">
+          {toastMessage}
+        </div>
       )}
 
-      {/* Main Content Area */}
-      <main
-        className={`flex-1 flex flex-col relative w-full ${
-          currentScreen === 'camuflaje' ? 'pt-0' : 'pt-16 pb-24'
-        } bg-[#0a0e1a] min-h-screen`}
-      >
+      {/* Contenedor central mobile-first */}
+      <main className="relative z-10 flex-1 w-full max-w-lg mx-auto px-4 pt-4 pb-28">
         {currentScreen === 'inicio' && <ScreenInicio onNavigate={setCurrentScreen} />}
 
         {currentScreen === 'test' && (
           <ScreenTest
             answers={answers}
             onAnswerChange={handleAnswerChange}
-            onSetAllAnswers={handleSetAllAnswers}
+            onLoadSampleCase={handleLoadSampleCase}
             onNavigate={setCurrentScreen}
-            currentResult={assessment}
+            currentResult={assessmentResult}
           />
         )}
 
         {currentScreen === 'diagnostico' && (
           <ScreenDiagnostico
-            assessment={assessment}
+            assessment={assessmentResult}
             answers={answers}
+            isSavedInVault={isSavedInVault}
+            onSavedToVault={() => {
+              setIsSavedInVault(true);
+              showToast('Diagnóstico guardado en la Bóveda volátil.');
+            }}
             onNavigate={setCurrentScreen}
-            onPurgeAndExit={handlePurgeAndRedirectGoogle}
+            onQuickPurge={handleQuickExit}
           />
         )}
 
         {currentScreen === 'boveda' && (
           <ScreenBoveda
-            assessment={assessment}
-            onPurgeAndRedirect={handlePurgeAndRedirectGoogle}
-            onSafeExit={handleSafeExit}
+            sessionUuid={sessionUuid}
+            assessment={assessmentResult}
+            answers={answers}
+            zeroTraceAutoPurge={zeroTraceAutoPurge}
+            onTogglePolicy={(val) => {
+              setZeroTraceAutoPurge(val);
+              showToast(
+                val
+                  ? 'Política Cero Huella estricto activada.'
+                  : 'Retención en memoria volátil activada.'
+              );
+            }}
+            onDestroyVault={handleQuickExit}
           />
         )}
 
@@ -129,19 +154,22 @@ export default function App() {
             onRedirectGoogle={handlePurgeAndRedirectGoogle}
           />
         )}
-
-        {currentScreen === 'camuflaje' && (
-          <ScreenCamouflage onReturnToApp={() => setCurrentScreen('inicio')} />
-        )}
       </main>
 
-      {/* Floating Emergency Panic Button (Hidden on Camouflage screen) */}
-      {currentScreen !== 'camuflaje' && currentScreen !== 'aerosalud' && (
-        <QuickExitButton onQuickExit={handleQuickExit} />
-      )}
+      {/* Pie discreto */}
+      <footer className="relative z-10 text-center text-[11px] text-purple-200/70 pb-24">
+        © 2026 Vitality Shield · Protocolo 0-Trace · Ley 1010 de 2006 (Colombia)
+      </footer>
 
-      {/* Bottom Navigation Bar */}
-      <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+      {/* Botones flotantes permanentes: Llamar 123 + Salida Rápida */}
+      <QuickExitButton currentScreen={currentScreen} onQuickExit={handleQuickExit} />
+
+      {/* Navegación inferior fija */}
+      <BottomNav
+        currentScreen={currentScreen}
+        onNavigate={setCurrentScreen}
+        hasDiagnosis={Object.values(answers).some((v) => v !== null)}
+      />
     </div>
   );
 }

@@ -4,14 +4,21 @@ import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export async function saveAssessmentToDatabase(
   assessment: AssessmentResult,
-  answers: Record<string, number>
+  answers: Record<string, number | null>
 ) {
+  const sanitizedAnswers: Record<string, number> = {};
+  for (const [key, val] of Object.entries(answers)) {
+    if (typeof val === 'number') {
+      sanitizedAnswers[key] = val;
+    }
+  }
+
   const payload = {
     anonymousId: assessment.anonymousId || 'uuid-v4-anonimo-89f2',
     score: assessment.score,
     riskLevel: assessment.riskLevel,
     factors: assessment.factors,
-    answers,
+    answers: sanitizedAnswers,
   };
 
   // 1. If user configured external Supabase, insert to Supabase
